@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Invitación Animada</title>
+  <meta name="viewport" content="width=400, initial-scale=1.0">
+  <style>
+    html, body {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      background: #222;
+      overflow: hidden;
+    }
+    body {
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+    #bg {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .centered {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+    }
+    #sobre-cerrado {
+      width: 370px;
+      max-width: 90vw;
+      transition: opacity 0.7s;
+      cursor: pointer;
+      box-shadow: 0 6px 36px #0004;
+      border-radius: 14px;
+      background: transparent;
+    }
+    #sobre-abierto-contenedor {
+      display: none;
+      width: 370px;
+      max-width: 90vw;
+      height: 265px;
+      position: relative;
+      z-index: 12;
+      perspective: 900px;
+      margin-bottom: 20px;
+    }
+    .sobre-base, .sobre-pliegue, .sobre-tapa, .sobre-inv, .sobre-inv-flip {
+      position: absolute;
+      width: 370px;
+      max-width: 90vw;
+      left: 0; top: 0;
+      user-select: none;
+      pointer-events: none;
+    }
+    .sobre-base { z-index: 1;}
+    .sobre-inv { z-index: 2; transition: top 0.9s cubic-bezier(.77,0,.18,1); top: 70px;}
+    .sobre-inv.salida { top: -110px;}
+    .sobre-pliegue { z-index: 3;}
+    .sobre-tapa {
+      z-index: 4;
+      transform-origin: bottom center;
+      transition: transform 1s cubic-bezier(.7,.08,.42,1.02);
+      cursor: pointer;
+      pointer-events: all;
+    }
+    .sobre-tapa.abierta { transform: rotateX(-120deg);}
+    /* Flipbook */
+    #flipbook {
+      display: none;
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%,-50%);
+      width: 370px; max-width: 90vw; height: 265px;
+      background: #fff;
+      box-shadow: 0 4px 32px #0004;
+      border-radius: 14px;
+      z-index: 20;
+      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.9s;
+    }
+    @keyframes fadeIn { from { opacity: 0;} to { opacity: 1;} }
+    .flip-pagina {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left: 0; top: 0;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px #0002;
+      transition: transform 0.7s cubic-bezier(.77,0,.18,1);
+      backface-visibility: hidden;
+      z-index: 1;
+      opacity: 1;
+    }
+    .flip-controls {
+      position: absolute;
+      bottom: 12px; left: 0; width: 100%;
+      display: flex; justify-content: space-between;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .flip-controls button {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #e0c9a6;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      pointer-events: all;
+      opacity: 0.92;
+      transition: background 0.2s;
+      box-shadow: 0 2px 8px #0002;
+    }
+    .flip-controls button:active {
+      background: #bfa674;
+    }
+    @media (max-width: 500px) {
+      #sobre-cerrado, #sobre-abierto-contenedor, #flipbook, .sobre-base, .sobre-pliegue, .sobre-tapa, .sobre-inv, .flip-pagina {
+        width: 96vw !important; max-width: 96vw !important; min-width: 0 !important;
+        height: auto !important; min-height: 0 !important;
+      }
+      #flipbook, #sobre-abierto-contenedor { height: auto !important;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Fondo principal -->
+  <img src="images/FONDOB.png" alt="fondo" id="bg">
+
+  <!-- Sobre cerrado -->
+  <div class="centered" id="sobre-cerrado-contenedor">
+    <img src="images/sobre cerrado.png" id="sobre-cerrado" alt="Sobre cerrado" draggable="false">
+  </div>
+
+  <!-- Sobre abierto (con animación) -->
+  <div class="centered" id="sobre-abierto-contenedor">
+    <img src="images/cuerpo del sobre.png" class="sobre-base" alt="Cuerpo del sobre" draggable="false">
+    <img src="images/page1.png" class="sobre-inv" id="inv-portada" alt="Invitación portada" draggable="false">
+    <img src="images/sobre izquierdo.png" class="sobre-pliegue" style="z-index:4;" alt="Sobre izquierdo" draggable="false">
+    <img src="images/derecha sobre.png" class="sobre-pliegue" style="z-index:4;" alt="Sobre derecho" draggable="false">
+    <img src="images/sobre abajo.png" class="sobre-pliegue" style="z-index:5;" alt="Sobre abajo" draggable="false">
+    <img src="images/tapa sobre.png" class="sobre-tapa" id="tapa-sobre" alt="Tapa sobre" draggable="false">
+  </div>
+
+  <!-- Flipbook -->
+  <div id="flipbook" class="centered">
+    <img src="images/page1.png" class="flip-pagina" id="flip-pagina" alt="Página">
+    <div class="flip-controls">
+      <button id="prevBtn" title="Página anterior">&lt;</button>
+      <button id="nextBtn" title="Página siguiente">&gt;</button>
+    </div>
+  </div>
+
+  <script>
+    // Paths de las páginas del flipbook (puedes agregar más si tienes)
+    const paginas = [
+      "images/page1.png",
+      "images/page2.png",
+      "images/page3.png",
+      "images/page4.png"
+    ];
+    let paginaActual = 0;
+
+    // Referencias DOM
+    const sobreCerradoCont = document.getElementById('sobre-cerrado-contenedor');
+    const sobreCerrado = document.getElementById('sobre-cerrado');
+    const sobreAbiertoCont = document.getElementById('sobre-abierto-contenedor');
+    const tapaSobre = document.getElementById('tapa-sobre');
+    const invPortada = document.getElementById('inv-portada');
+    const flipbook = document.getElementById('flipbook');
+    const flipPagina = document.getElementById('flip-pagina');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // Paso 1: Click en sobre cerrado para mostrar el sobre abierto
+    sobreCerrado.onclick = () => {
+      sobreCerrado.style.opacity = 0;
+      setTimeout(() => {
+        sobreCerradoCont.style.display = "none";
+        sobreAbiertoCont.style.display = "flex";
+      }, 700);
+    };
+
+    // Paso 2: Click en tapa para animar apertura y sacar invitación
+    tapaSobre.onclick = () => {
+      tapaSobre.classList.add('abierta');
+      tapaSobre.style.pointerEvents = "none";
+      setTimeout(() => {
+        invPortada.classList.add('salida');
+        // Esperar a que la invitación salga antes de mostrar el flipbook
+        setTimeout(() => {
+          sobreAbiertoCont.style.display = "none";
+          mostrarFlipbook();
+        }, 900);
+      }, 900);
+    };
+
+    // Flipbook funciones
+    function mostrarFlipbook() {
+      flipbook.style.display = "flex";
+      paginaActual = 0;
+      mostrarPagina();
+    }
+    function mostrarPagina() {
+      flipPagina.src = paginas[paginaActual];
+      prevBtn.style.visibility = (paginaActual === 0) ? "hidden" : "visible";
+      nextBtn.style.visibility = (paginaActual === paginas.length - 1) ? "hidden" : "visible";
+    }
+    prevBtn.onclick = () => {
+      if (paginaActual > 0) {
+        paginaActual--;
+        mostrarPagina();
+      }
+    };
+    nextBtn.onclick = () => {
+      if (paginaActual < paginas.length - 1) {
+        paginaActual++;
+        mostrarPagina();
+      }
+    };
+
+    // Prevenir arrastrar imágenes (para no romper el flow en móvil)
+    document.querySelectorAll('img').forEach(img => {
+      img.ondragstart = () => false;
+    });
+  </script>
+</body>
+</html>
